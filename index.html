@@ -1,0 +1,147 @@
+
+<h2 class="sr-only">MapaInversor.ar — mapa interactivo de desarrollos inmobiliarios en Argentina</h2>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<div style="background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden">
+  <div style="padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div>
+      <span style="font-size:15px;font-weight:500;color:var(--color-text-primary)">MapaInversor.ar</span>
+      <span style="font-size:12px;color:var(--color-text-secondary);margin-left:8px">4 desarrolladoras · Argentina</span>
+    </div>
+    <div id="filters" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+  </div>
+  <div id="map" style="height:380px;width:100%"></div>
+  <div style="padding:8px 12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:14px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--color-text-secondary)">📍 En curso &nbsp;⚪ Terminado</span>
+    <span style="font-size:11px;color:var(--color-text-secondary)">* Precios de referencia</span>
+  </div>
+</div>
+<div id="cards" style="margin-top:12px"></div>
+
+<script>
+const PROYECTOS=[
+  {id:"bn",dev:"byb",devLabel:"ByB Desarrollos",estado:"en-curso",nombre:"Atrium Barrio Norte",barrio:"Barrio Norte",dir:"Alvear y Uriburu",lat:-34.5970,lng:-58.3989,precio:"USD 65.000",desde:"desde 26 m²",pisos:12,unidades:96,amb:"1 y 2 amb.",amenities:["Piscina","Gimnasio","Parrilla","Seguridad 24hs"],color:"#185FA5"},
+  {id:"la",dev:"byb",devLabel:"ByB Desarrollos",estado:"en-curso",nombre:"Atrium La Isla",barrio:"Recoleta",dir:"Av. Las Heras y Agüero",lat:-34.5858,lng:-58.3991,precio:"USD 80.000",desde:"desde 23 m²",pisos:22,unidades:118,amb:"1, 2 y 3 amb.",amenities:["Piscina","Cochera","Parrilla","Seguridad 24hs"],color:"#185FA5"},
+  {id:"cb",dev:"byb",devLabel:"ByB Desarrollos",estado:"en-curso",nombre:"Central Belgrano",barrio:"Belgrano",dir:"Av. Cabildo 1611",lat:-34.5659,lng:-58.4523,precio:"USD 55.000",desde:"desde 30 m²",pisos:14,unidades:72,amb:"1 y 2 amb.",amenities:["Piscina","Gimnasio","Parrilla","Solarium"],color:"#185FA5"},
+  {id:"pc",dev:"vitrium",devLabel:"Vitrium Capital",estado:"en-curso",nombre:"Pueblo Caamaño",barrio:"Pilar",dir:"Av. Caamaño 662, Pilar",lat:-34.4593,lng:-58.9133,precio:"USD 60.000",desde:"desde 40 m²",pisos:4,unidades:450,amb:"1, 2 y 3 amb.",amenities:["Centro comercial","Espacios verdes","Anfiteatro"],color:"#7C3AED"},
+  {id:"vo",dev:"vitrium",devLabel:"Vitrium Capital",estado:"terminado",nombre:"Vitrium One",barrio:"Vicente López",dir:"Bartolomé Cruz 1850",lat:-34.5253,lng:-58.4882,precio:"—",desde:"Oficinas Clase A",pisos:5,unidades:5,amb:"Oficinas",amenities:["Clase A","Acceso Libertador"],color:"#7C3AED"},
+  {id:"ot",dev:"vitrium",devLabel:"Vitrium Capital",estado:"terminado",nombre:"01 Tigre",barrio:"Tigre",dir:"Bajada Panamericana Tigre",lat:-34.4263,lng:-58.5797,precio:"—",desde:"36-112 m²",pisos:3,unidades:126,amb:"Uso mixto",amenities:["Cocheras","Entorno natural"],color:"#7C3AED"},
+  {id:"ncb",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Canvas Barracas",barrio:"Barracas",dir:"Suarez 1700 esq. Montes de Oca",lat:-34.6395,lng:-58.3726,precio:"USD 110.300",desde:"desde 2 amb.",pisos:6,unidades:60,amb:"2, 3 y 4 amb.",amenities:["2 SUM","Gimnasio","Piscina","Pasaje europeo"],color:"#b45309"},
+  {id:"nvp",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Vitraux Palermo",barrio:"Palermo",dir:"Cabrera 3931/41",lat:-34.5914,lng:-58.4180,precio:"—",desde:"Diseño minimalista",pisos:8,unidades:40,amb:"1, 2 y 3 amb.",amenities:["Hormigón visto","DVH","Dobles alturas"],color:"#b45309"},
+  {id:"nspu",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Smart Point V. Urquiza",barrio:"Villa Urquiza",dir:"Le Breton 5100",lat:-34.5724,lng:-58.4884,precio:"USD 2.062/m²",desde:"desde pozo",pisos:9,unidades:50,amb:"1, 2 y 3 amb.",amenities:["Amenities","Apto prof.","Bajos gastos"],color:"#b45309"},
+  {id:"nspc",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Smart Point V. Crespo",barrio:"Villa Crespo",dir:"Pringles 1283",lat:-34.6005,lng:-58.4380,precio:"—",desde:"1 a 4 amb.",pisos:9,unidades:50,amb:"1 a 4 amb.",amenities:["Frente 40m","Apto prof."],color:"#b45309"},
+  {id:"nspr",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Smart Point Recoleta",barrio:"Recoleta",dir:"Recoleta, CABA",lat:-34.5880,lng:-58.3940,precio:"—",desde:"1 y 2 amb.",pisos:10,unidades:40,amb:"1 y 2 amb.",amenities:["Amenities","Diseño contemp."],color:"#b45309"},
+  {id:"nspf",dev:"newland",devLabel:"Newland",estado:"en-curso",nombre:"Smart Point Facultades",barrio:"Recoleta",dir:"Paraguay 2080",lat:-34.5993,lng:-58.3972,precio:"—",desde:"Mono a 3 amb.",pisos:12,unidades:50,amb:"Mono a 3 amb.",amenities:["Terraza c/parrilla","Co-working","DVH"],color:"#b45309"},
+  {id:"blb",dev:"baek",devLabel:"BAEK & Co",estado:"en-curso",nombre:"LeLis BLANC",barrio:"Villa Devoto",dir:"Navarro 4262",lat:-34.5998,lng:-58.5135,precio:"—",desde:"3, 4 y 5 amb.",pisos:5,unidades:24,amb:"3-5 amb.",amenities:["Piscina","Solarium","Parrilla","37 cocheras"],color:"#0f766e"},
+  {id:"bac",dev:"baek",devLabel:"BAEK & Co",estado:"en-curso",nombre:"AURIAN Caballito",barrio:"Caballito",dir:"Av. Donato Álvarez 292",lat:-34.6226,lng:-58.4510,precio:"—",desde:"2 a 5 amb.",pisos:9,unidades:36,amb:"2-5 amb.",amenities:["Locales comerciales","Tecnología"],color:"#0f766e"},
+  {id:"bch",dev:"baek",devLabel:"BAEK & Co",estado:"en-curso",nombre:"LeLis CHAMEAU",barrio:"Flores",dir:"Av. Donato Álvarez 470",lat:-34.6266,lng:-58.4560,precio:"—",desde:"4 amb. c/cochera",pisos:7,unidades:20,amb:"4 amb.",amenities:["Cochera exclusiva","Estilo francés"],color:"#0f766e"},
+  {id:"bao2",dev:"baek",devLabel:"BAEK & Co",estado:"en-curso",nombre:"AURIAN Office II",barrio:"Villa Santa Rita",dir:"Av. Gaona 3673",lat:-34.6092,lng:-58.4815,precio:"—",desde:"Oficinas",pisos:6,unidades:12,amb:"Oficinas",amenities:["Oficinas modernas","Balcones"],color:"#0f766e"},
+  {id:"bav",dev:"baek",devLabel:"BAEK & Co",estado:"terminado",nombre:"Av. Avellaneda 2224",barrio:"Flores",dir:"Av. Avellaneda 2224",lat:-34.6280,lng:-58.4640,precio:"—",desde:"Residencial",pisos:13,unidades:40,amb:"Varios",amenities:["Cocheras","Amenities"],color:"#0f766e"},
+];
+
+const DEVS={byb:{label:"ByB",color:"#185FA5"},vitrium:{label:"Vitrium",color:"#7C3AED"},newland:{label:"Newland",color:"#b45309"},baek:{label:"BAEK & Co",color:"#0f766e"}};
+let currentFilter="todos";
+let mapInstance=null;
+let markersObj={};
+
+function mkIconHtml(color,estado){
+  if(estado==="en-curso") return `<div style="width:26px;height:26px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>`;
+  return `<div style="width:20px;height:20px;background:${color};border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2);opacity:0.55"></div>`;
+}
+
+function hilite(id){
+  document.querySelectorAll(".pcard").forEach(c=>c.style.outline="none");
+  const el=document.getElementById("pc-"+id);
+  if(el){el.style.outline="2px solid "+PROYECTOS.find(p=>p.id===id).color;el.scrollIntoView({behavior:"smooth",block:"nearest"});}
+}
+
+function initMap(){
+  if(!window.L) return;
+  if(mapInstance) return;
+  mapInstance=L.map("map",{zoomControl:true}).setView([-34.60,-58.46],11);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"© OpenStreetMap © CARTO",subdomains:"abcd",maxZoom:20}).addTo(mapInstance);
+  PROYECTOS.forEach(p=>{
+    const icon=L.divIcon({className:"",html:mkIconHtml(p.color,p.estado),iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-28]});
+    const m=L.marker([p.lat,p.lng],{icon}).addTo(mapInstance);
+    const eSpan=p.estado==="en-curso"?`<span style="font-size:10px;background:#d1fae5;color:#065f46;padding:1px 5px;border-radius:8px;font-weight:600">En curso</span>`:`<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:1px 5px;border-radius:8px;font-weight:600">Terminado</span>`;
+    m.bindPopup(`<b style="font-size:13px">${p.nombre}</b> ${eSpan}<br><span style="font-size:11px;color:#888">${p.dir}</span><br><span style="font-size:10px;font-weight:600;color:${p.color}">${p.devLabel}</span>${p.precio!=="—"?`<br><span style="font-size:15px;font-weight:600;color:${p.color}">${p.precio}</span>`:""}<br><span style="font-size:10px;color:#888">${p.desde} · ${p.pisos} pisos · ${p.unidades} unid.</span>`);
+    m.on("click",()=>hilite(p.id));
+    markersObj[p.id]=m;
+  });
+  renderCards("todos");
+  renderFilters();
+}
+
+function renderFilters(){
+  const fc=document.getElementById("filters");
+  fc.innerHTML="";
+  const all=[{key:"todos",label:"Todos",color:"#1a1a1a"},...Object.entries(DEVS).map(([k,v])=>({key:k,label:v.label,color:v.color})),{key:"en-curso",label:"En curso",color:"#059669"},{key:"terminado",label:"Terminados",color:"#6b7280"}];
+  all.forEach(f=>{
+    const b=document.createElement("button");
+    b.textContent=f.label;
+    b.style.cssText=`font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;border:1px solid ${currentFilter===f.key?f.color:"var(--color-border-tertiary)"};background:${currentFilter===f.key?f.color:"var(--color-background-primary)"};color:${currentFilter===f.key?"#fff":"var(--color-text-secondary)"};cursor:pointer;transition:all .15s`;
+    b.onclick=()=>{currentFilter=f.key;renderFilters();renderCards(f.key);};
+    fc.appendChild(b);
+  });
+}
+
+function renderCards(filter){
+  const container=document.getElementById("cards");
+  container.innerHTML="";
+  const grupos=[{label:"En curso",key:"en-curso"},{label:"Terminados",key:"terminado"}];
+  grupos.forEach(g=>{
+    const visible=PROYECTOS.filter(p=>{
+      if(p.estado!==g.key) return false;
+      if(filter==="todos"||filter==="en-curso"||filter==="terminado") return true;
+      return p.dev===filter;
+    });
+    if(!visible.length) return;
+    const sec=document.createElement("div");
+    sec.innerHTML=`<div style="font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-secondary);padding:10px 4px 4px">${g.label} · ${visible.length} proyectos</div>`;
+    const grid=document.createElement("div");
+    grid.style.cssText="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px";
+    visible.forEach(p=>{
+      const card=document.createElement("div");
+      card.className="pcard";
+      card.id="pc-"+p.id;
+      card.style.cssText=`background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;cursor:pointer;transition:border-color .15s`;
+      card.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+          <span style="font-size:10px;font-weight:500;padding:2px 6px;border-radius:20px;background:${p.color}18;color:${p.color}">${p.devLabel}</span>
+          <div style="width:7px;height:7px;border-radius:50%;background:${p.estado==="en-curso"?"#059669":"#9ca3af"};margin-top:3px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:1px">${p.barrio}</div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;line-height:1.3">${p.nombre}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px">${p.dir}</div>
+        ${p.precio!=="—"?`<div style="font-size:16px;font-weight:500;color:${p.color};margin-bottom:1px">${p.precio}</div>`:""}
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px">${p.desde}</div>
+        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:6px;display:flex;flex-direction:column;gap:2px">
+          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--color-text-secondary)">Pisos</span><span style="color:var(--color-text-primary);font-weight:500">${p.pisos}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--color-text-secondary)">Unidades</span><span style="color:var(--color-text-primary);font-weight:500">${p.unidades}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--color-text-secondary)">Tipología</span><span style="color:var(--color-text-primary);font-weight:500">${p.amb}</span></div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px">${p.amenities.map(a=>`<span style="font-size:10px;padding:2px 6px;border-radius:20px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)">${a}</span>`).join("")}</div>
+      `;
+      card.onmouseenter=()=>{if(document.activeElement!==card) card.style.borderColor="var(--color-border-secondary)";};
+      card.onmouseleave=()=>{if(card.style.outline==="none"||!card.style.outline) card.style.borderColor="var(--color-border-tertiary)";};
+      card.onclick=()=>{
+        if(mapInstance){mapInstance.setView([p.lat,p.lng],15);markersObj[p.id]&&markersObj[p.id].openPopup();}
+        hilite(p.id);
+      };
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    container.appendChild(sec);
+  });
+}
+
+function tryInit(){
+  if(window.L){initMap();}
+  else{
+    const s=document.createElement("script");
+    s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.onload=initMap;
+    document.head.appendChild(s);
+  }
+}
+tryInit();
+</script>

@@ -1,20 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createAuthServerClient } from '@/lib/supabase-server'
-
-const LEAD_ESTADO_COLOR: Record<string, string> = {
-  nuevo:       'bg-blue-100 text-blue-700',
-  contactado:  'bg-amber-100 text-amber-700',
-  calificado:  'bg-green-100 text-green-700',
-  descartado:  'bg-gray-100 text-gray-500',
-}
-
-const LEAD_ESTADO_LABEL: Record<string, string> = {
-  nuevo:      'Nuevo',
-  contactado: 'Contactado',
-  calificado: 'Calificado',
-  descartado: 'Descartado',
-}
+import { LEAD_ESTADO_COLOR, LEAD_ESTADO_LABEL } from '@/types/proyecto'
 
 export default async function ProyectoLeadsPage({
   params,

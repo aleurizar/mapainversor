@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase'
-import MapView, { type Proyecto } from '@/components/MapView'
+import MapView from '@/components/MapView'
+import type { ProyectoMarker } from '@/types/proyecto'
 
 export const metadata = {
   title: 'MapaInversor.ar — Desarrollos inmobiliarios en Argentina',
@@ -13,7 +14,7 @@ export default async function HomePage() {
     .from('proyectos')
     .select('id, nombre, descripcion, estado, tipo, direccion, ciudad, latitud, longitud, precio_desde, moneda')
     .eq('activo', true)
-    .returns<Proyecto[]>()
+    .returns<ProyectoMarker[]>()
 
   return (
     <div className="flex flex-col h-full">

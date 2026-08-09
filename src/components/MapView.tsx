@@ -6,41 +6,16 @@ import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox'
 import type { MapRef } from '@vis.gl/react-mapbox'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-export interface Proyecto {
-  id: string
-  nombre: string
-  descripcion: string | null
-  estado: string
-  tipo: string
-  direccion: string
-  ciudad: string
-  latitud: number
-  longitud: number
-  precio_desde: number | null
-  moneda: string
-}
-
-const ESTADO_COLOR: Record<string, string> = {
-  en_pozo:        'bg-amber-500',
-  en_construccion: 'bg-blue-500',
-  terminado:      'bg-green-500',
-  entregado:      'bg-gray-400',
-}
-
-const ESTADO_LABEL: Record<string, string> = {
-  en_pozo:        'En pozo',
-  en_construccion: 'En construcción',
-  terminado:      'Terminado',
-  entregado:      'Entregado',
-}
+import type { ProyectoMarker } from '@/types/proyecto'
+import { ESTADO_COLOR_MARKER, ESTADO_LABEL } from '@/types/proyecto'
 
 interface Props {
-  proyectos: Proyecto[]
+  proyectos: ProyectoMarker[]
 }
 
 export default function MapView({ proyectos }: Props) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
-  const [popup, setPopup] = useState<Proyecto | null>(null)
+  const [popup, setPopup] = useState<ProyectoMarker | null>(null)
   const mapRef = useRef<MapRef>(null)
 
   useEffect(() => {
@@ -50,7 +25,7 @@ export default function MapView({ proyectos }: Props) {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  const handleMarkerClick = useCallback((p: Proyecto) => {
+  const handleMarkerClick = useCallback((p: ProyectoMarker) => {
     setPopup(p)
   }, [])
 
@@ -77,7 +52,7 @@ export default function MapView({ proyectos }: Props) {
           onClick={() => handleMarkerClick(p)}
         >
           <div
-            className={`w-4 h-4 rounded-full border-2 border-white shadow-md cursor-pointer transition-transform hover:scale-125 ${ESTADO_COLOR[p.estado] ?? 'bg-gray-500'}`}
+            className={`w-4 h-4 rounded-full border-2 border-white shadow-md cursor-pointer transition-transform hover:scale-125 ${ESTADO_COLOR_MARKER[p.estado] ?? 'bg-gray-500'}`}
             title={p.nombre}
           />
         </Marker>
@@ -94,7 +69,7 @@ export default function MapView({ proyectos }: Props) {
           className="rounded-xl shadow-xl"
         >
           <div className="p-3 min-w-[200px] max-w-[280px]">
-            <span className={`inline-block text-xs font-semibold text-white px-2 py-0.5 rounded-full mb-2 ${ESTADO_COLOR[popup.estado]}`}>
+            <span             className={`inline-block text-xs font-semibold text-white px-2 py-0.5 rounded-full mb-2 ${ESTADO_COLOR_MARKER[popup.estado]}`}>
               {ESTADO_LABEL[popup.estado] ?? popup.estado}
             </span>
             <h3 className="font-bold text-gray-900 text-sm leading-snug mb-1">{popup.nombre}</h3>

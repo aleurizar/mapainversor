@@ -2,26 +2,31 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase'
 import LeadForm from '@/components/LeadForm'
+import { ESTADO_LABEL, ESTADO_COLOR_BADGE, TIPO_LABEL } from '@/types/proyecto'
 
-const ESTADO_LABEL: Record<string, string> = {
-  en_pozo:         'En pozo',
-  en_construccion: 'En construcción',
-  terminado:       'Terminado',
-  entregado:       'Entregado',
-}
-
-const ESTADO_COLOR: Record<string, string> = {
-  en_pozo:         'bg-amber-100 text-amber-800',
-  en_construccion: 'bg-blue-100 text-blue-800',
-  terminado:       'bg-green-100 text-green-800',
-  entregado:       'bg-gray-100 text-gray-700',
-}
-
-const TIPO_LABEL: Record<string, string> = {
-  residencial: 'Residencial',
-  comercial:   'Comercial',
-  mixto:       'Mixto',
-  oficinas:    'Oficinas',
+type Proyecto = {
+  id: string
+  nombre: string
+  descripcion: string | null
+  estado: string
+  tipo: string
+  direccion: string
+  ciudad: string
+  provincia: string
+  precio_desde: number | null
+  moneda: string
+  superficie_desde: number | null
+  superficie_hasta: number | null
+  ambientes_min: number | null
+  ambientes_max: number | null
+  amenities: string[]
+  desarrolladoras: {
+    nombre: string
+    logo_url: string | null
+    sitio_web: string | null
+    telefono: string | null
+    descripcion: string | null
+  } | null
 }
 
 export async function generateMetadata({
@@ -127,7 +132,7 @@ export default async function ProyectoPage({
         <div className="mb-6">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span
-              className={`text-xs font-semibold px-3 py-1 rounded-full ${ESTADO_COLOR[proyecto.estado] ?? 'bg-gray-100 text-gray-700'}`}
+              className={`text-xs font-semibold px-3 py-1 rounded-full ${ESTADO_COLOR_BADGE[proyecto.estado] ?? 'bg-gray-100 text-gray-700'}`}
             >
               {ESTADO_LABEL[proyecto.estado] ?? proyecto.estado}
             </span>

@@ -24,4 +24,17 @@ test.describe('filtros de mapa', () => {
 
     await page.waitForURL(/.*[\?&]tipos=/)
   })
+
+  test('el toggle de heatmap se activa y desactiva', async ({ page }) => {
+    const toggle = page.locator('button[aria-pressed]')
+
+    await expect(toggle).toBeVisible()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  })
 })

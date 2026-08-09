@@ -7,39 +7,17 @@ import type { MapRef } from '@vis.gl/react-mapbox'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 import type { ProyectoMarker } from '@/types/proyecto'
-import { ESTADO_COLOR_MARKER, ESTADO_LABEL, ESTADO_HEX, clusterColor } from '@/types/proyecto'
+import { ESTADO_COLOR_MARKER, ESTADO_LABEL, clusterColor } from '@/types/proyecto'
+import { proyectosToGeoJSON } from '@/lib/mapbox'
 
 const SOURCE_ID = 'proyectos-cluster'
 
 interface Props {
   proyectos: ProyectoMarker[]
+  showHeatmap?: boolean
 }
 
-export function proyectosToGeoJSON(proyectos: ProyectoMarker[]) {
-  return {
-    type: 'FeatureCollection' as const,
-    features: proyectos.map((p) => ({
-      type: 'Feature' as const,
-      geometry: { type: 'Point' as const, coordinates: [p.longitud, p.latitud] },
-      properties: {
-        id: p.id,
-        nombre: p.nombre,
-        descripcion: p.descripcion,
-        estado: p.estado,
-        tipo: p.tipo,
-        direccion: p.direccion,
-        ciudad: p.ciudad,
-        latitud: p.latitud,
-        longitud: p.longitud,
-        precio_desde: p.precio_desde,
-        moneda: p.moneda,
-        marker_color: ESTADO_HEX[p.estado] ?? '#6b7280',
-      },
-    })),
-  }
-}
-
-export default function MapView({ proyectos }: Props) {
+export default function MapView({ proyectos, showHeatmap = false }: Props) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
   const [popup, setPopup] = useState<ProyectoMarker | null>(null)
   const mapRef = useRef<MapRef>(null)
@@ -99,6 +77,32 @@ export default function MapView({ proyectos }: Props) {
         'circle-stroke-width': 1.5,
         'circle-stroke-opacity': 1,
         'circle-opacity': 1,
+      },
+    })
+
+    map.addLayer({
+      id: 'proyectos-heat',
+      type: 'heatmap',
+      source: SOURCE_ID,
+      layout: { visibility: 'none' },
+      paint: {
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'point_count'], 0, 0, 10, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0, 9, 1],
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0,
+          'rgba(59,130,246,0)',
+          0.2,
+          '#3b82f6',
+          0.5,
+          '#22c55e',
+          0.8,
+          '#f59e0b',
+        ],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0, 12, 0.6, 18, 0],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 10, 5, 22, 20],
       },
     })
 
@@ -164,6 +168,32 @@ export default function MapView({ proyectos }: Props) {
       map.getCanvas().style.cursor = ''
     }
   }, [addLayers, removeLayers])
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap()
+    if (!map) return
+
+    const apply = () => {
+      const heatVisible = showHeatmap ? 'visible' : 'none'
+      const ptsVisible = showHeatmap ? 'none' : 'visible'
+      ;['proyectos-heat'].forEach((id) => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', heatVisible)
+      })
+      ;['clusters', 'cluster-count', 'unclustered-points'].forEach((id) => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', ptsVisible)
+      })
+    }
+
+    if (map.loaded()) apply()
+    else map.once('load', apply)
+
+    return () => {
+      map.off('load', apply)
+      ;['proyectos-heat', 'clusters', 'cluster-count', 'unclustered-points'].forEach((id) => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible')
+      })
+    }
+  }, [showHeatmap, proyectos])
 
   return (
     <>

@@ -34,6 +34,7 @@ export default function ProyectoFiltros({ proyectos }: Props) {
     const q = parseSet(searchParams?.get('tipos') ?? null)
     return q.size ? new Set([...q] as TipoProyecto[]) : new Set(ALL_TIPOS)
   })
+  const [showHeatmap, setShowHeatmap] = useState(false)
 
   const syncUrl = useCallback(
     (e: Set<EstadoProyecto>, t: Set<TipoProyecto>) => {
@@ -200,7 +201,20 @@ export default function ProyectoFiltros({ proyectos }: Props) {
       </aside>
 
       <main className="flex-1 relative">
-        <MapView proyectos={proyectosFiltrados} />
+        <div className="absolute top-4 right-4 z-10 bg-white rounded-xl border border-gray-200 shadow px-3 py-2 flex items-center gap-2.5">
+          <span className="text-xs font-medium text-gray-600">Densidad (heatmap)</span>
+          <button
+            type="button"
+            aria-pressed={showHeatmap}
+            onClick={() => setShowHeatmap((v) => !v)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showHeatmap ? 'bg-emerald-600' : 'bg-gray-300'}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showHeatmap ? 'translate-x-5' : 'translate-x-1'}`}
+            />
+          </button>
+        </div>
+        <MapView proyectos={proyectosFiltrados} showHeatmap={showHeatmap} />
       </main>
     </div>
   )

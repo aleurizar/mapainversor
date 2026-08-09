@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { proyectosToGeoJSON } from '@/components/MapView'
+import { proyectosToGeoJSON } from '@/lib/mapbox'
 import type { ProyectoMarker } from '@/types/proyecto'
 
 const sample: ProyectoMarker[] = [

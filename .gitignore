@@ -42,3 +42,8 @@ next-env.d.ts
 
 # claude local config
 /.claude/
+
+# testing artifacts
+/test-results/
+/playwright-report/
+/.playwright/

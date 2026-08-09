@@ -94,6 +94,23 @@ export const ESTADO_COLOR_MARKER: Record<string, string> = {
   entregado: 'bg-gray-400',
 }
 
+export const ESTADO_HEX: Record<string, string> = {
+  en_pozo: '#f59e0b',
+  en_construccion: '#3b82f6',
+  terminado: '#22c55e',
+  entregado: '#9ca3af',
+}
+
+export const CLUSTER_COLORS = ['#51bbd3', '#92a8d1', '#ecb32e', '#f0ad4e', '#e47949']
+
+export function clusterColor(count: number): string {
+  if (count < 20) return CLUSTER_COLORS[0]
+  if (count < 50) return CLUSTER_COLORS[1]
+  if (count < 100) return CLUSTER_COLORS[2]
+  if (count < 300) return CLUSTER_COLORS[3]
+  return CLUSTER_COLORS[4]
+}
+
 export const ESTADO_COLOR_BADGE: Record<string, string> = {
   en_pozo: 'bg-amber-100 text-amber-700',
   en_construccion: 'bg-blue-100 text-blue-700',

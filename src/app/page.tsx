@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import ProyectoFiltros from '@/components/ProyectoFiltros'
@@ -39,7 +40,15 @@ export default async function HomePage() {
       </header>
 
       {/* Mapa + filtros */}
-      <ProyectoFiltros proyectos={proyectos ?? []} />
+      <Suspense
+        fallback={
+          <div className="flex-1 flex items-center justify-center bg-gray-100 animate-pulse">
+            <span className="text-xs text-gray-400">Cargando mapa…</span>
+          </div>
+        }
+      >
+        <ProyectoFiltros proyectos={proyectos ?? []} />
+      </Suspense>
     </div>
   )
 }

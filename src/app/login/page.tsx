@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
@@ -89,9 +90,12 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          <a href="/" className="hover:text-gray-600 transition-colors">
+          <Link
+            href="/"
+            className="hover:text-gray-600 transition-colors"
+          >
             ← Volver al mapa
-          </a>
+          </Link>
         </p>
       </div>
     </div>

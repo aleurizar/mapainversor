@@ -70,10 +70,9 @@ export default async function ProyectoPage({
         nombre, logo_url, sitio_web, telefono, descripcion
       )
     `)
-    .eq('id', id)
-    .eq('activo', true)
-    .single()
-
+     .eq('id', id)
+     .eq('activo', true)
+     .single() as { data: Proyecto | null; error: unknown }
   if (!proyecto) notFound()
 
   const dev = proyecto.desarrolladoras as unknown as {

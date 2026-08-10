@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import Map, { Marker } from 'react-map-gl/mapbox'
 import type { MapRef } from '@vis.gl/react-mapbox'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -13,15 +13,6 @@ interface Props {
 
 export default function MapCoordenadas({ latitud, longitud, onChange }: Props) {
   const mapRef = useRef<MapRef>(null)
-  const [view, setView] = useState({
-    longitude: longitud,
-    latitude: latitud,
-    zoom: 12,
-  })
-
-  useEffect(() => {
-    setView((v) => ({ ...v, longitude: longitud, latitude: latitud }))
-  }, [latitud, longitud])
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -38,7 +29,11 @@ export default function MapCoordenadas({ latitud, longitud, onChange }: Props) {
       <Map
         ref={mapRef}
         mapboxAccessToken={token}
-        initialViewState={view}
+        initialViewState={{
+          longitude: longitud,
+          latitude: latitud,
+          zoom: 12,
+        }}
         mapStyle="mapbox://styles/mapbox/light-v11"
         onClick={(e) => {
           onChange(e.lngLat.lat, e.lngLat.lng)

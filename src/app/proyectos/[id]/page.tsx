@@ -29,6 +29,8 @@ type Proyecto = {
   } | null
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({
   params,
 }: {
@@ -40,6 +42,7 @@ export async function generateMetadata({
     .from('proyectos')
     .select('nombre, ciudad')
     .eq('id', id)
+    .eq('estado_revision', 'aprobado')
     .single()
 
   if (!data) return { title: 'Proyecto no encontrado' }
@@ -72,6 +75,7 @@ export default async function ProyectoPage({
     `)
      .eq('id', id)
      .eq('activo', true)
+     .eq('estado_revision', 'aprobado')
      .single() as { data: Proyecto | null; error: unknown }
   if (!proyecto) notFound()
 

@@ -9,6 +9,8 @@ export const metadata = {
   description: 'Encontrá proyectos inmobiliarios en todo el país en el mapa.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = createClient()
 
@@ -16,6 +18,7 @@ export default async function HomePage() {
     .from('proyectos')
     .select('id, nombre, descripcion, estado, tipo, direccion, ciudad, latitud, longitud, precio_desde, moneda')
     .eq('activo', true)
+    .eq('estado_revision', 'aprobado')
     .returns<ProyectoMarker[]>()
 
   return (

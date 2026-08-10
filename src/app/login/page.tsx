@@ -97,6 +97,13 @@ export default function LoginPage() {
             ← Volver al mapa
           </Link>
         </p>
+
+        <p className="text-center text-xs text-gray-400 mt-4">
+          ¿Representás a una desarrolladora?{' '}
+          <Link href="/registro" className="hover:text-gray-600 transition-colors">
+            Registrate acá
+          </Link>
+        </p>
       </div>
     </div>
   )

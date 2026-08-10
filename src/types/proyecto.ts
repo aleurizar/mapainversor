@@ -10,6 +10,8 @@ export type TipoProyecto =
   | 'mixto'
   | 'oficinas'
 
+export type EstadoRevision = 'pendiente' | 'aprobado' | 'rechazado'
+
 export interface Proyecto {
   id: string
   nombre: string
@@ -31,6 +33,8 @@ export interface Proyecto {
   imagenes: string[]
   amenities: string[]
   activo: boolean
+  estado_revision: EstadoRevision
+  motivo_rechazo: string | null
   created_at: string
   updated_at: string
   desarrolladora_id: string
@@ -144,4 +148,16 @@ export const LEAD_ESTADO_LABEL: Record<string, string> = {
   contactado: 'Contactado',
   calificado: 'Calificado',
   descartado: 'Descartado',
+}
+
+export const REVISION_LABEL: Record<string, string> = {
+  pendiente: 'En revisión',
+  aprobado: 'Aprobado',
+  rechazado: 'Rechazado',
+}
+
+export const REVISION_COLOR_BADGE: Record<string, string> = {
+  pendiente: 'bg-amber-100 text-amber-700',
+  aprobado: 'bg-emerald-100 text-emerald-700',
+  rechazado: 'bg-red-100 text-red-700',
 }

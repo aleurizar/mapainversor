@@ -72,7 +72,7 @@ export async function editarProyecto(proyectoId: string, formData: FormData) {
   if (error) throw new Error(error.message)
 
   revalidatePath('/dashboard')
-  revalidatePath('/proyectos/[id]')
+  revalidatePath('/proyectos/' + proyectoId)
   revalidatePath('/')
   redirect('/dashboard')
 }

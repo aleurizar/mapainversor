@@ -68,7 +68,7 @@ export default async function EditarProyectoPage({
       </p>
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <ProyectoForm
-          action={(formData) => editarProyecto(id, formData)}
+          action={editarProyecto.bind(null, id)}
           initial={initial}
           pendingLabel="Guardar cambios"
         />

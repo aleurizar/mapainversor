@@ -116,13 +116,8 @@ function ProyectosTable({
                 {showAcciones && (
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <form
-                        action={async () => {
-                          const fd = new FormData()
-                          fd.set('proyecto_id', proyecto.id)
-                          await aprobarProyecto(fd)
-                        }}
-                      >
+                      <form action={aprobarProyecto}>
+                        <input type="hidden" name="proyecto_id" value={proyecto.id} />
                         <button
                           type="submit"
                           className="text-xs font-medium text-emerald-700 border border-emerald-200 rounded-lg px-3 py-1.5 hover:bg-emerald-50 transition-colors"
@@ -131,14 +126,9 @@ function ProyectosTable({
                         </button>
                       </form>
                       <RechazoForm proyectoId={proyecto.id} />
-                      <form
-                        action={async () => {
-                          const fd = new FormData()
-                          fd.set('proyecto_id', proyecto.id)
-                          fd.set('activo', proyecto.activo ? 'false' : 'true')
-                          await toggleActivoProyecto(fd)
-                        }}
-                      >
+                      <form action={toggleActivoProyecto}>
+                        <input type="hidden" name="proyecto_id" value={proyecto.id} />
+                        <input type="hidden" name="activo" value={proyecto.activo ? 'false' : 'true'} />
                         <button
                           type="submit"
                           title={proyecto.activo ? 'Ocultar del mapa' : 'Mostrar en el mapa'}

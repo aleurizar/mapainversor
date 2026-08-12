@@ -68,13 +68,8 @@ export default async function AdminProyectoPage({
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4 flex-wrap">
           <p className="text-sm text-amber-800">Este proyecto está esperando revisión.</p>
           <div className="flex items-center gap-2">
-            <form
-              action={async () => {
-                const fd = new FormData()
-                fd.set('proyecto_id', proyecto.id)
-                await aprobarProyecto(fd)
-              }}
-            >
+            <form action={aprobarProyecto}>
+              <input type="hidden" name="proyecto_id" value={proyecto.id} />
               <button
                 type="submit"
                 className="text-xs font-semibold text-white bg-emerald-600 rounded-lg px-4 py-2 hover:bg-emerald-700 transition-colors"
@@ -123,14 +118,9 @@ export default async function AdminProyectoPage({
         {dev?.descripcion && <p className="text-sm text-gray-600 mt-4">{dev.descripcion}</p>}
       </div>
 
-      <form
-        action={async () => {
-          const fd = new FormData()
-          fd.set('proyecto_id', proyecto.id)
-          fd.set('activo', proyecto.activo ? 'false' : 'true')
-          await toggleActivoProyecto(fd)
-        }}
-      >
+      <form action={toggleActivoProyecto}>
+        <input type="hidden" name="proyecto_id" value={proyecto.id} />
+        <input type="hidden" name="activo" value={proyecto.activo ? 'false' : 'true'} />
         <button
           type="submit"
           className={`text-xs font-semibold rounded-lg px-4 py-2 border transition-colors ${

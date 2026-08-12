@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createAuthServerClient } from '@/lib/supabase-server'
+import { isAdmin } from '@/lib/auth'
 import LogoutButton from '@/components/LogoutButton'
 
 export const metadata = {
@@ -16,6 +17,8 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  if (await isAdmin(user.id)) redirect('/admin')
 
   const { data: desarrolladora } = await supabase
     .from('desarrolladoras')

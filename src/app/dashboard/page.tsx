@@ -1,7 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createAuthServerClient } from '@/lib/supabase-server'
-import { ESTADO_LABEL, ESTADO_COLOR_BADGE } from '@/types/proyecto'
+import {
+  ESTADO_LABEL,
+  ESTADO_COLOR_BADGE,
+  REVISION_LABEL,
+  REVISION_COLOR_BADGE,
+} from '@/types/proyecto'
 
 export default async function DashboardPage() {
   const supabase = await createAuthServerClient()
@@ -14,18 +19,11 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .single()
 
-  if (!desarrolladora) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full py-32 text-center">
-        <p className="text-gray-500 text-sm mb-2">Tu cuenta no está vinculada a ninguna desarrolladora.</p>
-        <p className="text-gray-400 text-xs">Contactá a soporte para configurar tu perfil.</p>
-      </div>
-    )
-  }
+  if (!desarrolladora) redirect('/registro')
 
   const { data: proyectos } = await supabase
     .from('proyectos')
-    .select('id, nombre, estado, ciudad, precio_desde, moneda, leads(count)')
+    .select('id, nombre, estado, estado_revision, motivo_rechazo, ciudad, precio_desde, moneda, leads(count)')
     .eq('desarrolladora_id', desarrolladora.id)
     .order('created_at', { ascending: false })
 
@@ -37,9 +35,25 @@ export default async function DashboardPage() {
   return (
     <div className="px-8 py-8 max-w-5xl">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Mis proyectos</h1>
-        <p className="text-sm text-gray-500 mt-1">{desarrolladora.nombre}</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Mis proyectos</h1>
+          <p className="text-sm text-gray-500 mt-1">{desarrolladora.nombre}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href="/dashboard/perfil"
+            className="text-xs font-medium text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+          >
+            Perfil
+          </Link>
+          <Link
+            href="/dashboard/proyectos/nuevo"
+            className="text-xs font-semibold text-white bg-gray-900 rounded-lg px-3 py-2 hover:bg-gray-700 transition-colors"
+          >
+            + Nuevo proyecto
+          </Link>
+        </div>
       </div>
 
       {/* Stats rápidas */}
@@ -56,7 +70,7 @@ export default async function DashboardPage() {
       {proyectos && proyectos.length > 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <table className="w-full text-sm">
-            <thead>
+              <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
                   Proyecto
@@ -65,7 +79,7 @@ export default async function DashboardPage() {
                   Estado
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 hidden sm:table-cell">
-                  Ciudad
+                  Revisión
                 </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
                   Leads
@@ -92,20 +106,35 @@ export default async function DashboardPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-gray-500 hidden sm:table-cell">
-                      {proyecto.ciudad}
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${REVISION_COLOR_BADGE[proyecto.estado_revision] ?? 'bg-gray-100 text-gray-600'}`} title={proyecto.motivo_rechazo ?? undefined}>
+                        {REVISION_LABEL[proyecto.estado_revision] ?? proyecto.estado_revision}
+                      </span>
+                      {proyecto.estado_revision === 'rechazado' && proyecto.motivo_rechazo && (
+                        <p className="text-xs text-red-500 mt-1 max-w-[220px]">
+                          {proyecto.motivo_rechazo}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-4 text-right">
                       <span className={`font-semibold ${leadCount > 0 ? 'text-gray-900' : 'text-gray-300'}`}>
                         {leadCount}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-right">
-                      <Link
-                        href={`/dashboard/proyectos/${proyecto.id}`}
-                        className="text-xs font-medium text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
-                      >
-                        Ver leads
-                      </Link>
+                    <td className="px-4 py-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-2">
+                        <Link
+                          href={`/dashboard/proyectos/${proyecto.id}/editar`}
+                          className="text-xs font-medium text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+                        >
+                          Editar
+                        </Link>
+                        <Link
+                          href={`/dashboard/proyectos/${proyecto.id}`}
+                          className="text-xs font-medium text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
+                        >
+                          Ver leads
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -116,6 +145,12 @@ export default async function DashboardPage() {
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 py-16 text-center">
           <p className="text-gray-400 text-sm">Todavía no tenés proyectos cargados.</p>
+          <Link
+            href="/dashboard/proyectos/nuevo"
+            className="mt-3 inline-block text-sm font-medium text-white bg-gray-900 rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors"
+          >
+            Cargar tu primer proyecto
+          </Link>
         </div>
       )}
     </div>

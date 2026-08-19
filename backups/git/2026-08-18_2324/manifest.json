@@ -1,0 +1,19 @@
+﻿{
+    "proyecto":  "ladrillo",
+    "slug":  "ladrillo",
+    "fecha":  "2026-08-18_2324",
+    "origen":  "C:\\dev\\ladrillo",
+    "docs":  {
+                 "archivos":  2,
+                 "bytes":  64022
+             },
+    "git":  {
+                "estado":  "error",
+                "detalle":  "",
+                "repo":  "aleurizar/ladrillo",
+                "commit":  "",
+                "rama":  "",
+                "creado":  false
+            },
+    "nube":  null
+}
